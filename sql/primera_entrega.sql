@@ -12,7 +12,7 @@ CREATE TABLE "dim_geografia" (
   "municipio" varchar(100),
   "codigo_dane_depto" varchar(20),
   "departamento" varchar(100),
-  "zona_hecho" varchar(50),
+  "zona_hecho" varchar(100),
   "localidad" varchar(100)
 );
 
@@ -32,7 +32,7 @@ CREATE TABLE "dim_victima" (
   "pueblo_indigena" varchar(100),
   "orientacion_sexual" varchar(100),
   "identidad_genero" varchar(100),
-  "transgenero" varchar(20)
+  "transgenero" varchar(100)
 );
 
 CREATE TABLE "dim_circunstancia" (
