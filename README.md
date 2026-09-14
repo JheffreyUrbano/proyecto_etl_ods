@@ -1,7 +1,5 @@
 # Presuntos suicidios en Colombia (2015-2024)
 
-Proyecto de la asignatura ETL (G51) del programa de Ingeniería de Datos e Inteligencia Artificial.
-
 ## 1. Objetivo
 
 El objetivo es construir un proceso ETL para organizar y analizar los registros de presuntos suicidios ocurridos en Colombia entre 2015 y 2024.
