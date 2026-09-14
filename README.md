@@ -8,10 +8,13 @@ El objetivo es construir un proceso ETL para organizar y analizar los registros 
 
 Con este proyecto buscamos responder preguntas como:
 
-- ¿Cómo cambia el número de casos por año?
-- ¿Qué grupos de edad y sexo concentran más registros?
-- ¿Cómo se comportan los casos en algunos municipios del Valle del Cauca?
-- ¿Qué información temporal, geográfica, demográfica y circunstancial se puede consultar desde una base de datos?
+- ¿Qué diferencias se observan entre sexo y mecanismo causal?
+- ¿Qué grupos de edad y ciclo vital concentran más registros?
+- ¿Existen patrones por mes, día y rango horario?
+- ¿Cómo se distribuyen los registros entre zonas urbanas y rurales?
+- ¿Qué razones reportadas aparecen con mayor frecuencia según el estado civil?
+- ¿Cómo se distribuyen los registros según el nivel de escolaridad?
+- ¿Qué tan completa es la información de grupos étnicos, pertenencia grupal, orientación sexual e identidad de género?
 
 El proyecto no pretende diagnosticar las causas de los casos ni reemplazar un análisis médico, judicial o de salud pública. Su propósito es organizar la información disponible y facilitar su consulta.
 
@@ -132,22 +135,76 @@ Se implementó un esquema estrella. La tabla de hechos contiene un registro por 
 
 El script de creación de la base de datos se encuentra en `sql/primera_entrega.sql`. La tabla de hechos tiene llaves foráneas hacia las cuatro dimensiones.
 
-## 9. EDA y visualizaciones
+## 9. Líneas de análisis
 
-El notebook `02_etl_eda.ipynb` realiza consultas SQL sobre PostgreSQL y usa los resultados para generar:
+Las siguientes líneas organizan el análisis del proyecto. El EDA incluye una gráfica general de evolución histórica y siete análisis específicos. Los resultados deben interpretarse como patrones descriptivos de los registros y no como relaciones causales.
 
-1. **Tendencia anual:** línea con el total de casos por año entre 2015 y 2024.
-2. **Perfil demográfico:** barras por grupo de edad quinquenal y sexo.
-3. **Análisis geográfico:** tendencia anual para Cali, Buenaventura, Yumbo, Tuluá, Palmira y Jamundí, en el Valle del Cauca.
+### 9.1. Diferencias por sexo y mecanismo causal
 
-De esta forma, el análisis se construye a partir de las tablas almacenadas en PostgreSQL y no directamente desde el CSV original.
+Se cruzan `dim_victima.sexo` con `dim_circunstancia.mecanismo_causal` y `dim_circunstancia.diagnostico_topografico`. El objetivo es comparar la distribución de mecanismos entre hombres y mujeres y observar si aparecen diferencias en los diagnósticos registrados.
+
+Este análisis puede aportar información para discutir estrategias diferenciadas de prevención y restricción de medios letales. No se debe afirmar que un sexo utiliza siempre un mecanismo específico sin revisar los resultados y sin contar con información de población expuesta o intentos no fatales.
+
+### 9.2. Edad y ciclo vital
+
+Se utilizan `ciclo_vital`, `grupo_edad_quinquenal` y `grupo_mayor_menor_edad` para comparar adolescencia, juventud, adultez, personas mayores, menores de edad y mayores de edad.
+
+El análisis permite distinguir entre el grupo con mayor volumen absoluto de registros y los grupos que requieren una interpretación particular. No se hablará de tasas por edad a menos que se incorpore una población de referencia.
+
+### 9.3. Estacionalidad, día y hora
+
+Se analizan `anio`, `mes`, `dia` y `rango_hora_3h` de `dim_tiempo`. Esto permite revisar concentraciones por mes, días de la semana y franjas horarias, además de comparar los años 2015 a 2024.
+
+El periodo 2020-2021 puede marcarse como un intervalo de interés para comparar antes, durante y después de la pandemia. Esa comparación será descriptiva y no demostrará por sí sola un efecto del confinamiento.
+
+### 9.4. Diferencias territoriales
+
+Se cruzan `departamento`, `municipio`, `zona_hecho` y `codigo_dane_municipio` de `dim_geografia`. El objetivo es contrastar el volumen de registros de cabeceras municipales y zonas rurales, y localizar territorios que merezcan una revisión más detallada.
+
+Las ciudades grandes pueden tener más registros por su tamaño poblacional. Por eso, el proyecto diferencia entre volumen absoluto y tasa: para calcular tasas se necesitarían datos de población por territorio y año.
+
+### 9.5. Razón reportada, estado civil y circunstancias
+
+Se relacionan `razon_suicidio`, `circunstancia_detallada` y `estado_civil`. Se revisan categorías como conflictos de pareja, enfermedades y dificultades económicas según el estado civil registrado.
+
+El resultado permitirá describir perfiles de los registros y proponer preguntas para estudios posteriores. La columna `razon_suicidio` no debe interpretarse automáticamente como una causa médica comprobada.
+
+### 9.6. Escolaridad
+
+Se comparan `escolaridad`, `grupo_edad_quinquenal` y `razon_suicidio`. En la limpieza se consolidaron categorías equivalentes, por ejemplo, las categorías de preescolar, básica primaria, básica secundaria y posgrado.
+
+El análisis mostrará cómo se distribuyen los registros por nivel educativo y qué razones aparecen dentro de cada grupo. No se describirá la escolaridad como un factor protector sin un diseño estadístico y una población de comparación.
+
+### 9.7. Poblaciones y calidad del dato
+
+Se revisan `pertenencia_grupal`, `pertenencia_etnica`, `pueblo_indigena`, `orientacion_sexual` e `identidad_genero`.
+
+Además de buscar diferencias descriptivas entre grupos, se medirá cuántos registros contienen valores como `SIN INFORMACION`, `NO REGISTRA` o `NO HABIA SIDO IMPLEMENTADA`. Esto permite evaluar la calidad de las variables sensibles y evitar conclusiones basadas en información incompleta.
+
+### Visualizaciones actuales
+
+El notebook `02_etl_eda.ipynb` ya realiza consultas SQL sobre PostgreSQL y genera:
+
+1. **Total histórico:** evolución general de los registros entre 2015 y 2024.
+2. **Sexo y mecanismo causal:** barras comparativas por sexo y mecanismo.
+3. **Edad y ciclo vital:** distribución de registros por ciclo vital.
+4. **Día y hora:** mapa de calor por día de la semana y rango horario.
+5. **Territorio:** comparación de zonas del hecho en los departamentos con más registros.
+6. **Razón y estado civil:** razones reportadas según el estado civil.
+7. **Escolaridad:** distribución de registros por nivel educativo.
+8. **Calidad del dato:** cantidad de registros sin información en variables sensibles.
+
+El análisis se construye a partir de las tablas almacenadas en PostgreSQL y no directamente desde el CSV original.
+
+En el notebook, cada análisis está acompañado por una breve descripción de la pregunta, las variables utilizadas y la forma correcta de interpretar la gráfica. Esto facilita la explicación del proyecto durante la sustentación.
 
 ## 10. Estructura del repositorio
 
 ```text
 etl_project/
 ├── assets/
-│   └── primera_entrega_star.png
+│   ├── primera_entrega_star.png
+│   └── consultas/
 ├── data/
 │   └── Presuntos_Suicidios._Colombia,_2015_a_2024.csv
 ├── docs/
@@ -196,3 +253,23 @@ Los datos tienen carácter estadístico y forense. La palabra “presuntos” es
 - [Portal de Datos Abiertos de Colombia](https://www.datos.gov.co/)
 - [Ficha oficial del dataset](https://www.datos.gov.co/Justicia-y-Derecho/Presuntos-Suicidios-Colombia-2015-a-2024-Cifras-de/f75u-mirk/about_data)
 - [Instituto Nacional de Medicina Legal y Ciencias Forenses](https://www.medicinalegal.gov.co/)
+
+## 14. Informe técnico final
+
+Para el informe final se puede utilizar la siguiente estructura:
+
+1. **Introducción:** contexto del problema y propósito del proyecto.
+2. **Objetivo y ODS:** relación con el ODS 3 y preguntas de análisis.
+3. **Fuente de datos:** origen, entidad responsable, cobertura, periodo y calidad.
+4. **Requisitos:** filas, columnas, variables y necesidades del análisis.
+5. **Arquitectura:** flujo desde el CSV hasta PostgreSQL y el EDA.
+6. **Tecnologías:** Python, Pandas, Jupyter, PostgreSQL, SQLAlchemy, Matplotlib y Seaborn.
+7. **Proceso ETL:** extracción, limpieza, homologación, dimensiones y tabla de hechos.
+8. **Modelo dimensional:** explicación del esquema estrella y sus relaciones.
+9. **Migración:** carga de las dimensiones y hechos, llaves foráneas y reinicio de identidades.
+10. **EDA:** descripción de las ocho visualizaciones y las consultas SQL utilizadas.
+11. **Resultados:** principales patrones encontrados, siempre hablando de registros y no de tasas.
+12. **Limitaciones:** cobertura médico-legal, ausencia de población denominadora y valores sin información.
+13. **Conclusiones:** aprendizajes técnicos y posibles ampliaciones del proyecto.
+
+Las evidencias principales para el informe son `01_etl_pipeline.ipynb`, `02_etl_eda.ipynb`, `sql/primera_entrega.sql`, la imagen del esquema estrella y las gráficas generadas desde PostgreSQL.
