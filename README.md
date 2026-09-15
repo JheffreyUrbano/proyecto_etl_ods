@@ -55,6 +55,7 @@ El proyecto busca cumplir los siguientes requisitos de la primera entrega:
 ## 5. Arquitectura del proceso
 
 El flujo implementado es:
+
 ![Flujo General](assets/flujo.png)
 
 El archivo `01_etl_pipeline.ipynb` realiza la extracción, limpieza, transformación y carga. El archivo `02_etl_eda.ipynb` consulta PostgreSQL y genera las visualizaciones.
