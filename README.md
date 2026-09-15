@@ -55,25 +55,7 @@ El proyecto busca cumplir los siguientes requisitos de la primera entrega:
 ## 5. Arquitectura del proceso
 
 El flujo implementado es:
-
-```text
-CSV de Datos Abiertos
-  |
-  v
-Extracción con Pandas
-  |
-  v
-Limpieza y homologación de categorías
-  |
-  v
-Construcción de dimensiones y tabla de hechos
-  |
-  v
-PostgreSQL
-  |
-  v
-Consultas SQL y visualizaciones del EDA
-```
+![Flujo General](assets/flujo.png)
 
 El archivo `01_etl_pipeline.ipynb` realiza la extracción, limpieza, transformación y carga. El archivo `02_etl_eda.ipynb` consulta PostgreSQL y genera las visualizaciones.
 
